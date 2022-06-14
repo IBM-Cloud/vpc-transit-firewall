@@ -1,0 +1,100 @@
+# resources - postgresql and cloud object storage with associated endpoint gateway and security groups
+locals {
+  namepg = "${local.name}-pg"
+}
+
+//------------------------------------------------
+// postgresql
+resource "ibm_database" "postgresql" {
+  name              = local.namepg
+  resource_group_id = local.resource_group_id
+  plan              = "standard"
+  service           = "databases-for-postgresql"
+  location          = local.region
+  service_endpoints = "private"
+  tags              = local.tags
+}
+
+resource "ibm_resource_key" "postgresql" {
+  name                 = local.namepg
+  resource_instance_id = ibm_database.postgresql.id
+  role                 = "Administrator"
+  tags                 = local.tags
+}
+
+resource "time_sleep" "wait_for_postgresql_initialization" {
+  depends_on = [
+    ibm_database.postgresql
+  ]
+  create_duration = "5m"
+}
+
+# use the subnet in the tranit vpc
+locals {
+  transit_zone        = local.transit_zones[0]
+  veg_vpc_id          = local.transit_zone.vpc_id
+  veg_subnet_id       = local.transit_zone.subnet_available0_id
+  hostname_postgresql = ibm_database.postgresql.connectionstrings[0].hosts[0].hostname
+  postgresql_port     = ibm_database.postgresql.connectionstrings[0].hosts[0].port
+}
+
+resource "ibm_is_security_group" "postgresql" {
+  name           = "${local.name}-pg-key"
+  vpc            = local.veg_vpc_id
+  resource_group = local.resource_group_id
+}
+
+# todo ratchet down
+resource "ibm_is_security_group_rule" "cloud_ingress_postgresql" {
+  group     = ibm_is_security_group.postgresql.id
+  direction = "inbound"
+  #remote    = "10.0.0.0/8" // on prem and cloud
+  tcp {
+    port_min = local.postgresql_port
+    port_max = local.postgresql_port
+  }
+}
+
+resource "ibm_is_security_group_rule" "cloud_egress_postgresql" {
+  group     = ibm_is_security_group.postgresql.id
+  direction = "outbound"
+  #remote    = "10.0.0.0/8" // on prem and cloud
+}
+
+// race condition the security group deletion after endpoint_gateway is deleted
+// virtual_endpoint_gateway -> time_sleep -> security_group the delete in the reverse order means a 10s delay before delete of sg
+// https://github.com/IBM-Cloud/terraform-provider-ibm/issues/3780
+resource "time_sleep" "wait_for_security_group_delete_postgresql" {
+  depends_on       = [ibm_is_security_group.postgresql]
+  destroy_duration = "10s"
+}
+
+resource "ibm_is_virtual_endpoint_gateway" "postgresql" {
+  depends_on = [
+    time_sleep.wait_for_postgresql_initialization,
+    time_sleep.wait_for_security_group_delete_postgresql,
+  ]
+  vpc            = local.veg_vpc_id
+  name           = local.namepg
+  resource_group = local.resource_group_id
+  target {
+    crn           = ibm_database.postgresql.id
+    resource_type = "provider_cloud_service"
+  }
+  security_groups = [ibm_is_security_group.postgresql.id]
+
+  # one Reserved IP per zone in the VPC
+  ips {
+    subnet = local.veg_subnet_id
+    name   = "postgresql"
+  }
+  tags = local.tags
+}
+
+output "postgresql" {
+  value = {
+    veg                 = ibm_is_virtual_endpoint_gateway.postgresql.ips[0].address
+    hostname_postgresql = ibm_database.postgresql.connectionstrings[0].hosts[0].hostname
+    postgresql_port     = ibm_database.postgresql.connectionstrings[0].hosts[0].port
+  }
+}
