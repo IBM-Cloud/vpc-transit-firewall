@@ -30,7 +30,7 @@ locals {
     zones = { for zone in range(var.zones_cloud) : zone => {
       name      = "${var.prefix}-spoke-${spoke}-${var.region}-${zone + 1}"
       zone      = "${var.region}-${zone + 1}"
-      cidr      = cidrsubnet(local.cidr_cloud_zones[zone].cidr, 8, spoke+1)
+      cidr      = cidrsubnet(local.cidr_cloud_zones[zone].cidr, 8, spoke + 1)
       cidr_zone = local.cidr_cloud_zones[zone].cidr # cidr for entire zone
   } } } }
 

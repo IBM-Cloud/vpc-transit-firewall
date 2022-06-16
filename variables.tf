@@ -29,3 +29,8 @@ variable "spokes" {
   default     = 2
 }
 
+variable "firewall_replicas" {
+  description = "number of firewalls in each zone, 2 is typical"
+  default     = 2
+}
+

@@ -18,6 +18,7 @@ locals {
   user_data = <<-EOT
   #!/bin/bash
   set -x
+  echo v1 todo
   export DEBIAN_FRONTEND=noninteractive
   apt -qq -y update < /dev/null
   apt -qq -y install net-tools nginx npm < /dev/null
@@ -109,7 +110,9 @@ output "transit_zones" {
 
 # one more on spoke 1 no fip:
 resource "ibm_is_instance" "extra" {
-  for_each       = { for index, value in [local.spokes_zones[1].zones[0]] : index => value }
+  # todo just spoke 1 or all spokes?
+  #for_each       = { for index, value in [local.spokes_zones[1].zones[0]] : index => value }
+  for_each       = { for index, value in local.instances : index => value }
   tags           = local.tags
   resource_group = local.resource_group_id
   name           = "${each.value.name}-extra"

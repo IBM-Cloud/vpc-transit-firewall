@@ -94,11 +94,9 @@ resource "ibm_is_lb_pool_member" "zone" {
   #weight = 50
 }
 
+# one fore each firewall replica
 resource "ibm_is_instance" "zone" {
-  for_each = {
-    0 = 0
-    # 1 = 1 # demonstrate multiple instances
-  }
+  for_each = { for key in range(var.firewall_replicas) : key => key }
   tags                      = var.tags
   resource_group = var.resource_group_id
   name           = "${var.name}-${each.value}"
@@ -107,18 +105,43 @@ resource "ibm_is_instance" "zone" {
   vpc            = var.vpc_id
   zone           = ibm_is_subnet.zone.zone
   keys           = var.keys
-  user_data      = <<-EOT
-    ${var.user_data}
-    echo ${var.name} > /var/www/html/instance
-    sysctl -w net.ipv4.ip_forward=1
-    echo 'net.ipv4.ip_forward=1' >> /etc/sysctl.conf 
-  EOT
-
   primary_network_interface {
     subnet          = ibm_is_subnet.zone.id
     security_groups = [ibm_is_security_group.zone.id]
     allow_ip_spoofing = true
   }
+  user_data      = <<-EOT
+    ${var.user_data}
+    echo ${var.name} > /var/www/html/instance
+    sysctl -w net.ipv4.ip_forward=1
+    echo 'net.ipv4.ip_forward=1' >> /etc/sysctl.conf 
+    #
+    cat > /etc/iptables.private << 'EOF'
+    *filter
+    :INPUT ACCEPT
+    :OUTPUT ACCEPT
+    :FORWARD DROP
+    -A FORWARD -s ${var.cidr_zone} -d ${var.cidr_zone} -p tcp -j ACCEPT
+    COMMIT
+    EOF
+    #
+    sed -e "s/HOSTNAMEI/$(hostname -I)/" > /etc/iptables.public << 'EOF'
+    *filter
+    :INPUT ACCEPT
+    :OUTPUT ACCEPT
+    :FORWARD ACCEPT
+    COMMIT
+    *nat
+    :PREROUTING ACCEPT
+    :INPUT ACCEPT
+    :OUTPUT ACCEPT
+    :POSTROUTING ACCEPT
+    -A POSTROUTING -s ${var.cidr_zone} -d ${var.cidr_zone} -p tcp -j ACCEPT
+    -A POSTROUTING -s ${var.cidr_zone} -p tcp -j SNAT --to-source HOSTNAMEI
+    COMMIT
+    EOF
+    iptables-restore /etc/iptables.public
+  EOT
 }
 
 resource "ibm_is_vpc_routing_table_route" "zone" {

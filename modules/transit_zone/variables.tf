@@ -5,6 +5,7 @@ variable "resource_group_id" {}
 variable "image_id" {}
 variable "profile" {}
 variable "keys" {}
+variable "firewall_replicas" {}
 variable "user_data" {}
 
 # see common.tf: local.cidr_transit_vpc

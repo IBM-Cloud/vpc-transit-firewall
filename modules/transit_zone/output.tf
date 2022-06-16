@@ -17,7 +17,7 @@ output "instances" {
   value = { for index, instance in ibm_is_instance.zone : index => {
     floating_ip_address  = ibm_is_floating_ip.zone[index].address
     primary_ipv4_address = instance.primary_network_interface[0].primary_ipv4_address
-    instance = instance
+    # todo instance = instance
   } }
 }
 output subnet_available0_id {

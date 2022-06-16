@@ -53,6 +53,7 @@ module "transit_zones" {
   image_id             = data.ibm_is_image.os.id
   profile              = local.profile
   keys                 = [data.ibm_is_ssh_key.sshkey.id]
+  firewall_replicas    = var.firewall_replicas
   user_data            = local.user_data
   name                 = each.value.name
   zone                 = each.value.zone
