@@ -1,4 +1,10 @@
-A source network address translation, SNAT, is required in the firewall to route traffic over the floating ip that is attached to the firewall.  The NLB has Direct Server Retuirn, DSR.  The return address in the packet is the originating instance in the spoke. The server in the cloud is found with
+# Firewall appliances in a transit VPC
+## Prerequisites
+## Transit and spokes
+### spoke routing
+### Transit firewall via iptables
+## Spoke
+A source network address translation, SNAT, is required in the firewall to route traffic over the floating ip that is attached to the firewall.  The NLB has Direct Server Retuirn, DSR, meaning the source address in the packet is the originating instance in the spoke. The server in the cloud is found with
 ```
 iptables-restore <<'EOF'
 *filter
@@ -7,6 +13,7 @@ iptables-restore <<'EOF'
 :OUTPUT ACCEPT
 COMMIT
 
+# nat allows the spokes access to the internet
 *nat
 :PREROUTING ACCEPT
 :INPUT ACCEPT
@@ -17,6 +24,7 @@ COMMIT
 -A POSTROUTING -s 10.8.2.0/24 -p tcp -j SNAT --to-source 10.8.0.198
 COMMIT
 EOF
+
 # second
 iptables-restore <<'EOF'
 *filter

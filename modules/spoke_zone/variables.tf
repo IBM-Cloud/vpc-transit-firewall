@@ -8,6 +8,7 @@ variable "keys" {}
 variable "user_data" {}
 
 variable "cidr_zone" {}
+variable "cidr_transit" {}
 variable "next_hop" {}
 
 # see common.tf: local.cidr_transit_vpc

@@ -24,15 +24,6 @@ resource "ibm_tg_connection" "zone" {
   network_id   = ibm_is_vpc.transit.crn
 }
 
-resource "ibm_is_vpc_routing_table" "transit" {
-  vpc                           = ibm_is_vpc.transit.id
-  name                          = ibm_is_vpc.transit.name
-  route_transit_gateway_ingress = true
-  route_direct_link_ingress     = false
-  route_vpc_zone_ingress        = false
-}
-
-# todo
 locals {
   user_data = <<-EOT
   #!/bin/bash
@@ -44,21 +35,21 @@ locals {
 }
 
 module "transit_zones" {
-  for_each             = local.cidr_transit_vpc
-  source               = "./modules/transit_zone"
-  tags                 = local.tags
-  vpc_id               = ibm_is_vpc.transit.id
-  vpc_routing_table_id = ibm_is_vpc_routing_table.transit.routing_table
-  resource_group_id    = data.ibm_resource_group.all_rg.id
-  image_id             = data.ibm_is_image.os.id
-  profile              = local.profile
-  keys                 = [data.ibm_is_ssh_key.sshkey.id]
-  firewall_replicas    = var.firewall_replicas
-  user_data            = local.user_data
-  name                 = each.value.name
-  zone                 = each.value.zone
-  cidr_zone            = each.value.cidr_zone
-  cidr                 = each.value.cidr
+  for_each          = local.cidr_transit_vpc
+  source            = "./modules/transit_zone"
+  tags              = local.tags
+  vpc_id            = ibm_is_vpc.transit.id
+  resource_group_id = data.ibm_resource_group.all_rg.id
+  image_id          = data.ibm_is_image.os.id
+  profile           = local.profile
+  keys              = [data.ibm_is_ssh_key.sshkey.id]
+  firewall_lb       = var.firewall_lb
+  firewall_replicas = var.firewall_replicas
+  user_data         = local.user_data
+  name              = each.value.name
+  zone              = each.value.zone
+  cidr_zone         = each.value.cidr_zone
+  cidr              = each.value.cidr
 }
 
 

@@ -1,22 +1,13 @@
-/*
-todo
-output "script_cloud" {
-  value = templatefile("${path.module}/script.tftpl", {
-    transit_zones = module.transit_zones
-    transit_vpc   = ibm_is_vpc.transit
-    spokes        = module.spokes
-  })
-}
-*/
-
 output "transit_zones" {
   value = { for tz_key, tz in module.transit_zones : tz_key => {
     vpc_id               = tz.vpc_id
     subnet_available0_id = tz.subnet_available0_id
-    next_hop = tz.next_hop
-    instances = { for instance_key, instance in tz.instances : instance_key => {
-      floating_ip_address  = instance.floating_ip_address
-      primary_ipv4_address = instance.primary_ipv4_address
+    next_hop             = tz.next_hop
+    zone                 = tz.zone
+    name                 = tz.name
+    firewalls = { for fw_key, fw in tz.firewalls : fw_key => {
+      floating_ip_address  = fw.floating_ip_address
+      primary_ipv4_address = fw.primary_ipv4_address
   } } } }
 }
 output "spokes" {

@@ -1,10 +1,10 @@
 variable "tags" {}
 variable "vpc_id" {}
-variable "vpc_routing_table_id" {}
 variable "resource_group_id" {}
 variable "image_id" {}
 variable "profile" {}
 variable "keys" {}
+variable "firewall_lb" {}
 variable "firewall_replicas" {}
 variable "user_data" {}
 

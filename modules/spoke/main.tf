@@ -37,4 +37,5 @@ module "spoke_zones" {
   zone                 = each.value.zone
   cidr                 = each.value.cidr
   cidr_zone            = each.value.cidr_zone
+  cidr_transit         = each.value.cidr_transit
 }
