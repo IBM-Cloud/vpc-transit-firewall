@@ -82,6 +82,8 @@ resource "ibm_is_instance" "private" {
   }
 }
 
+/*
+todo
 output "spokes" {
   value = { for key, value in ibm_is_instance.private : key => {
     console              = <<-EOT
@@ -90,6 +92,22 @@ output "spokes" {
     primary_ipv4_address = value.primary_network_interface[0].primary_ipv4_address
     name                 = value.name
   } }
+}
+*/
+
+output "spokes" {
+  value = [for i, instance in local.instances : {
+    primary_ipv4_address = ibm_is_instance.private[i].primary_network_interface[0].primary_ipv4_address
+    zone_key             = instance.zone_key
+    zone                 = instance.zone
+    spoke_key            = instance.spoke_key
+    name                 = instance.name
+    jump_floating_ip     = ibm_is_floating_ip.transit[instance.zone_key].address
+    name                 = instance.name
+    console              = <<-EOT
+    ssh -J root@${ibm_is_floating_ip.transit[instance.zone_key].address} root@{ibm_is_instance.private[i].primary_network_interface[0].primary_ipv4_address}
+    EOT
+  }]
 }
 
 
