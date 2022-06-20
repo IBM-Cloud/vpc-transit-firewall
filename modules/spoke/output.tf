@@ -11,11 +11,3 @@ output "spoke_zones" {
 output "vpc_id" {
   value = ibm_is_vpc.spoke.id
 }
-
-#todo
-output "zones" {
-  value = var.zones
-}
-output "next_hops" {
-  value = var.next_hops
-}

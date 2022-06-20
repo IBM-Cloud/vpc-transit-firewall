@@ -102,7 +102,7 @@ resource "ibm_is_instance" "firewall" {
   for_each       = { for key in range(var.firewall_replicas) : key => key }
   tags           = var.tags
   resource_group = var.resource_group_id
-  name           = "${var.name}-${each.value}"
+  name           = "${var.name}-firewall-${each.value}"
   image          = var.image_id
   profile        = var.profile
   vpc            = var.vpc_id
@@ -147,10 +147,34 @@ resource "ibm_is_instance" "firewall" {
   EOT
 }
 
-resource "ibm_is_floating_ip" "zone" {
+resource "ibm_is_floating_ip" "firewall" {
   for_each       = ibm_is_instance.firewall
   tags           = var.tags
   resource_group = var.resource_group_id
   name           = each.value.name
   target         = each.value.primary_network_interface[0].id
+}
+
+# bastion
+resource "ibm_is_instance" "bastion" {
+  tags           = var.tags
+  resource_group = var.resource_group_id
+  name           = "${var.name}-bastion"
+  image          = var.image_id
+  profile        = var.profile
+  vpc            = var.vpc_id
+  zone           = ibm_is_subnet.available0.zone
+  keys           = var.keys
+  primary_network_interface {
+    subnet            = ibm_is_subnet.available0.id
+    security_groups   = [ibm_is_security_group.zone.id]
+  }
+  user_data = var.user_data
+}
+
+resource "ibm_is_floating_ip" "bastion" {
+  tags           = var.tags
+  resource_group = var.resource_group_id
+  name           = ibm_is_instance.bastion.name
+  target         = ibm_is_instance.bastion.primary_network_interface[0].id
 }

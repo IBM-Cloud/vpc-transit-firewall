@@ -1,4 +1,5 @@
 variable "tg_gateway_id" {}
+variable "spoke_routing" {}
 variable "resource_group_id" {}
 variable "image_id" {}
 variable "profile" {}
@@ -9,5 +10,5 @@ variable "tags" {}
 # see common.tf: local.cidr_transit_vpc
 variable "name" {}
 variable "zones" {}
-variable "next_hops" {}
+variable "transit_zones" {}
 

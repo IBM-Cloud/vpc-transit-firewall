@@ -58,6 +58,7 @@ module "spokes" {
   source            = "./modules/spoke"
   tags              = local.tags
   tg_gateway_id     = ibm_tg_gateway.region.id
+  spoke_routing     = var.spoke_routing
   resource_group_id = data.ibm_resource_group.all_rg.id
   image_id          = data.ibm_is_image.os.id
   profile           = local.profile
@@ -65,5 +66,5 @@ module "spokes" {
   user_data         = local.user_data
   name              = each.value.name
   zones             = each.value.zones
-  next_hops         = { for tzone_id, tzone in module.transit_zones : tzone_id => tzone.next_hop }
+  transit_zones     = module.transit_zones
 }

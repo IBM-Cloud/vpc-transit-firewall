@@ -25,7 +25,7 @@ variable "zones_cloud" {
 }
 
 variable "spokes" {
-  description = "number of spokes in the cloud, 1..n"
+  description = "number of spokes in the cloud, 0..n-1"
   default     = 2
 }
 
@@ -39,3 +39,9 @@ variable "firewall_replicas" {
   default     = 2
 }
 
+variable "spoke_routing" {
+  description = <<-EOT
+  Is there spoke routing?  There must be for the firewalls to be engaged. Useful for testing"
+  EOT
+  default     = true
+}

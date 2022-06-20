@@ -82,35 +82,21 @@ resource "ibm_is_instance" "private" {
   }
 }
 
-/*
-todo
-output "spokes" {
-  value = { for key, value in ibm_is_instance.private : key => {
-    console              = <<-EOT
-    ssh -J root@${ibm_is_floating_ip.transit[local.instances[key].zone_key].address} root@${value.primary_network_interface[0].primary_ipv4_address}
-    EOT
-    primary_ipv4_address = value.primary_network_interface[0].primary_ipv4_address
-    name                 = value.name
-  } }
-}
-*/
-
-output "spokes" {
+output "spoke_instances" {
   value = [for i, instance in local.instances : {
     primary_ipv4_address = ibm_is_instance.private[i].primary_network_interface[0].primary_ipv4_address
     zone_key             = instance.zone_key
     zone                 = instance.zone
     spoke_key            = instance.spoke_key
     name                 = instance.name
-    jump_floating_ip     = ibm_is_floating_ip.transit[instance.zone_key].address
+    jump_floating_ip     = local.transit_zones[instance.zone_key].bastion_floating_ip_address
     name                 = instance.name
-    console              = <<-EOT
-    ssh -J root@${ibm_is_floating_ip.transit[instance.zone_key].address} root@{ibm_is_instance.private[i].primary_network_interface[0].primary_ipv4_address}
-    EOT
+    ssh              = "ssh -J root@${local.transit_zones[instance.zone_key].bastion_floating_ip_address} root@${ibm_is_instance.private[i].primary_network_interface[0].primary_ipv4_address}"
   }]
 }
 
 
+/*
 #----- transit debug bastion instance ----------------------------
 resource "ibm_is_security_group" "transit_all" {
   resource_group = local.resource_group_id
@@ -126,7 +112,6 @@ resource "ibm_is_security_group_rule" "transit_outbound_all" {
   group     = ibm_is_security_group.transit_all.id
   direction = "outbound"
 }
-
 
 resource "ibm_is_instance" "transit" {
   for_each       = local.transit_zones
@@ -156,13 +141,14 @@ resource "ibm_is_floating_ip" "transit" {
   name           = each.value.name
   target         = each.value.primary_network_interface[0].id
 }
+*/
 
+/*
 output "transit_bastion" {
   value = { for key, value in ibm_is_instance.transit : key => {
-    console              = <<-EOT
-    ssh root@${ibm_is_floating_ip.transit[key].address}
-    EOT
+    ssh              = "ssh root@${ibm_is_floating_ip.transit[key].address}"
     primary_ipv4_address = value.primary_network_interface[0].primary_ipv4_address
     name                 = value.name
   } }
 }
+*/
