@@ -9,7 +9,7 @@ resource "ibm_is_vpc_address_prefix" "zone" {
 }
 
 resource "ibm_is_vpc_routing_table" "spoke" {
-  count = var.spoke_routing ? 1 : 0
+  count                         = var.spoke_routing ? 1 : 0
   vpc                           = var.vpc_id
   name                          = var.name
   route_transit_gateway_ingress = false
@@ -19,7 +19,7 @@ resource "ibm_is_vpc_routing_table" "spoke" {
 
 
 resource "ibm_is_vpc_routing_table_route" "zone" {
-  count = var.spoke_routing ? 1 : 0
+  count         = var.spoke_routing ? 1 : 0
   vpc           = var.vpc_id
   routing_table = ibm_is_vpc_routing_table.spoke[0].routing_table
   zone          = var.zone
@@ -33,7 +33,7 @@ resource "ibm_is_vpc_routing_table_route" "zone" {
 # spoke to transit bastion is not through the firewall.
 # This allows the spokes to be accessed via ssh from the transit server
 resource "ibm_is_vpc_routing_table_route" "bastion" {
-  count = var.spoke_routing ? 1 : 0
+  count         = var.spoke_routing ? 1 : 0
   vpc           = var.vpc_id
   routing_table = ibm_is_vpc_routing_table.spoke[0].routing_table
   zone          = var.zone

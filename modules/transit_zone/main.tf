@@ -166,8 +166,8 @@ resource "ibm_is_instance" "bastion" {
   zone           = ibm_is_subnet.available0.zone
   keys           = var.keys
   primary_network_interface {
-    subnet            = ibm_is_subnet.available0.id
-    security_groups   = [ibm_is_security_group.zone.id]
+    subnet          = ibm_is_subnet.available0.id
+    security_groups = [ibm_is_security_group.zone.id]
   }
   user_data = var.user_data
 }

@@ -91,7 +91,7 @@ output "spoke_instances" {
     name                 = instance.name
     jump_floating_ip     = local.transit_zones[instance.zone_key].bastion_floating_ip_address
     name                 = instance.name
-    ssh              = "ssh -J root@${local.transit_zones[instance.zone_key].bastion_floating_ip_address} root@${ibm_is_instance.private[i].primary_network_interface[0].primary_ipv4_address}"
+    ssh                  = "ssh -J root@${local.transit_zones[instance.zone_key].bastion_floating_ip_address} root@${ibm_is_instance.private[i].primary_network_interface[0].primary_ipv4_address}"
   }]
 }
 
