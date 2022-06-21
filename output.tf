@@ -14,11 +14,12 @@ output "transit_zones" {
 }
 output "spokes" {
   value = { for spoke_key, spoke in module.spokes : spoke_key => {
-    vpc_id = spoke.vpc_id
     zones = { for zone_key, zone in spoke.spoke_zones : zone_key => {
-      zone      = zone.zone
-      subnet_id = zone.subnet_id
+      zone             = zone.zone
+      subnet_id        = zone.subnet_id
+      routing_table_id = zone.routing_table_id
     } }
+    vpc_id = spoke.vpc_id
   } }
 }
 

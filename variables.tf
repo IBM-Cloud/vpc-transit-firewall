@@ -35,8 +35,8 @@ variable "firewall_lb" {
 }
 
 variable "firewall_replicas" {
-  description = "number of firewalls in each zone, 2 is typical"
-  default     = 2
+  description = "number of firewalls in each zone, 1 is good for initial testing, 2 is more typical"
+  default     = 1
 }
 
 variable "spoke_routing" {
