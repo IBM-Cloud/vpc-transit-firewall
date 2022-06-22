@@ -2,7 +2,7 @@
 This is the companion repository for the blog post [VPC Transit Firewall](todo).  Terraform is used in this repository to depoloy the following architecture:
 
 Diagram showing flows
-![intro](./images/firewall-intro.svg){: class="center"}
+![intro](./images/firewall-intro.svg)
 
 ## Prerequisites
 
