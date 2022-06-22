@@ -1,5 +1,5 @@
 # Firewall appliances in a transit VPC
-This is the companion repository for the blog post [VPC Transit Firewall](todo).  Terraform is used in this repository to deploy the following architecture:
+This is the companion repository for the blog post [VPC Transit Firewall](todo).  Terraform is used in this repository to depoloy the following architecture:
 
 ## Diagram showing flows:
 
@@ -7,20 +7,20 @@ This is the companion repository for the blog post [VPC Transit Firewall](todo).
 
 - Bastion can be used to ssh to instances in the spokes
 - Spoke instances can communicate with other spokes through the firewall
-- Spoke instances can communicate with the Internet through the firewall
+- Spoke instances can communicate with the internet through the firewall
 
-## Diagram showing zones
+## Diagram showning zones
 ![zonal](./images/firewall-zonal.svg)
 
-The zonal structure of the architecture is important in design and results in simple routing rules:
+The zonal struture of the architecture is important in design and results in simple routing rules:
 
 - There are 3 zone CIDR blocks 10.8.0.0, 10.9.0.0 and 10.10.0.0
 - Each VPC carves out a CIDR block in each zone
-- Keeping traffic within a zone insures resiliency from a zone failure
+- Keeping traffic within a zone insures resiliancy from a zone failure
 
 ## Prerequisites
 
-Before continuing you must satisfy the following prerequisites.
+Before continuing you must satisfy the following prereequisites.
 - Permissions to create resources including: VPC and instances, Transit Gateway, 
 - [Shell with ibmcloud cli and terraform](https://cloud.ibm.com/docs/solution-tutorials?topic=solution-tutorials-tutorials)
 - Follow the instructions to satisfy the [Prerequisites for NLB with routing mode](https://cloud.ibm.com/docs/vpc?topic=vpc-nlb-vnf&interface=ui)
@@ -132,7 +132,7 @@ r006-bc7d6518-3d92-47a0-872f-761a74c4bd18   vpcfw-spoke-1-us-south-1-transit-bas
 ```
 
 
-Be ready to set up a couple of ssh sessions.  In one terminal ssh to the firewall.  Check out the iptables that configure the firewall:
+Be ready to set up a couple of ssh sessions.  In one terminal ssh to the firewall.  Check out the iptables that confiure the firewall:
 ```
 $ ssh root@52.116.138.80
 ....
@@ -156,7 +156,7 @@ COMMIT
 # Completed on Tue Jun 21 15:26:48 2022
 ```
 
-The `*filter` section has a `:FORWARD ACCEPT` to allow all packets that are received and not addressed to this instance to be forwarded to the destination.  The traffic from the spokes will be forwarded towards the destination.  Each packet has a source address of the sender since a NLB is configured with [Direct Server Return](https://cloud.ibm.com/docs/vpc?topic=vpc-network-load-balancers).
+The `*filter` section has a `:FORWARD ACCEPT` to allow all packets that are recieved and not addressed to this instance to be forwarded to the destination.  The traffic from the spokes will be forwarded towards the destination.  Each packet has a source address of the sender since a NLB is configured with [Direct Server Return](https://cloud.ibm.com/docs/vpc?topic=vpc-network-load-balancers).
 
 The `*nat` section will be covered in more detail later and can be ignored for now.
 
@@ -168,7 +168,7 @@ tcpdump: verbose output suppressed, use -v or -vv for full protocol decode
 listening on ens3, link-type EN10MB (Ethernet), capture size 262144 bytes
 ```
 
-In a different terminal ssh to the spoke 0 instance (spoke_key == 0), There is a handy ssh command that uses the transit bastion as a jump server.  Then curl to the spoke 1 instance:
+In a different terminal ssh to the spoke 0 intance (spoke_key == 0), There is a handy ssh command that uses the transit bastion as a jump server.  Then curl to the spoke 1 instance:
 ```
 $ ssh -J root@52.118.184.49 root@10.8.1.4
 ...
@@ -330,7 +330,7 @@ The public iptable rules has the section:
 -A POSTROUTING -s 10.8.0.0/16 -d 10.8.0.0/16 -p tcp -j ACCEPT
 -A POSTROUTING -s 10.8.0.0/16 -p tcp -j SNAT --to-source 10.8.0.4
 ```
-In the POSTROUTING chain you can see that packets with source/destination in the availability zone are simply ACCEPTed.  But the rest of the packets, those destine for the internet, are sent to the SNAT table.
+In the POSTROUTING chain you can see that packets with source/desgination in the availability zone are simply ACCEPTed.  But the rest of the packets, those destine for the internet, are sent to the SNAT table.
 
 Without SNAT:
 
