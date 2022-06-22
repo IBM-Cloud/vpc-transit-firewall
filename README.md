@@ -129,7 +129,6 @@ $ ibmcloud is vpc-routing-table-routes r006-7f2903a3-045c-417e-9fc4-5ee45e3d6f69
 Listing routes for routing table r006-81ffe1c9-6fd9-4929-8479-e79eae611546 of vpc r006-7f2903a3-045c-417e-9fc4-5ee45e3d6f69 under account Powell Quiring's Account as user pquiring@us.ibm.com...
 ID                                          Name                                       Action     Status   Destination   Next hop     Zone
 r006-bc7d6518-3d92-47a0-872f-761a74c4bd18   vpcfw-spoke-1-us-south-1-transit-bastion   delegate   stable   10.8.0.4/32   0.0.0.0      us-south-1
-r006-e4839bad-b484-471b-aa3f-3fa0fb721577   vpcfw-spoke-1-us-south-1                   deliver    stable   0.0.0.0/0     10.8.0.198   us-south-1
 ```
 
 
@@ -190,7 +189,7 @@ listening on ens3, link-type EN10MB (Ethernet), capture size 262144 bytes
 ## Configuration
 There are a few terraform [variables](./variables.tf) that can be used to tune things up.  Here are a couple to look at:
 
-- number_of_firewalls_per_zone - default 1, if your firewall supports multiple instances then scaling them could hep with performance and availability.
+- number_of_firewalls_per_zone - default 1, if your firewall supports multiple instances then scaling them could help with performance and availability.
 - firewall_lb - default true, if you only have a single firewall there is no reason to use a NLB, lets set this to false and try again:
 
 ```
@@ -227,6 +226,22 @@ Listing routes for routing table r006-81ffe1c9-6fd9-4929-8479-e79eae611546 of vp
 ID                                          Name                                       Action     Status   Destination   Next hop     Zone
 r006-bc7d6518-3d92-47a0-872f-761a74c4bd18   vpcfw-spoke-1-us-south-1-transit-bastion   delegate   stable   10.8.0.4/32   0.0.0.0      us-south-1
 r006-80a77bff-33d3-4567-b212-fb86b6551c38   vpcfw-spoke-1-us-south-1                   deliver    stable   0.0.0.0/0     10.8.0.196   us-south-1
+```
+
+To generate the zone level diagram above, verify the following variables are in the environment:
+
+```
+vi local.env;
+source local.env
+env | grep TF_VAR
+TF_VAR_firewall_lb=true
+TF_VAR_number_of_firewalls_per_zone=2
+TF_VAR_number_of_zones=3
+```
+
+Apply:
+```
+terraform apply
 ```
 
 ## iptables firewall
