@@ -2,7 +2,7 @@
 
 variable "prefix" {
   description = "resources created will be named: $${prefix}vpc-pubpriv, vpc name will be $${prefix} or will be defined by vpc_name"
-  default     = "reglb"
+  default     = "vpcfw"
 }
 
 variable "resource_group_name" {
@@ -19,7 +19,7 @@ variable "region" {
   default     = "us-south"
 }
 
-variable "zones_cloud" {
+variable "number_of_zones" {
   description = "number of zones in the cloud, 1..3"
   default     = 1
 }
@@ -34,12 +34,12 @@ variable "firewall_lb" {
   default     = true
 }
 
-variable "firewall_replicas" {
+variable "number_of_firewalls_per_zone" {
   description = "number of firewalls in each zone, 1 is good for initial testing, 2 is more typical"
   default     = 1
 }
 
-variable "spoke_routing" {
+variable "use_routing" {
   description = <<-EOT
   Is there spoke routing?  There must be for the firewalls to be engaged. Useful for testing"
   EOT

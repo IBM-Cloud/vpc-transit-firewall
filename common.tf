@@ -8,14 +8,14 @@ locals {
   zone_onprem = "${var.region}-1"
 
   # cloud configuration
-  cidr_cloud  = "10.8.0.0/14"
-  zones_cloud = 2
-  cidr_cloud_zones = { for zone in range(var.zones_cloud) : zone => {
+  cidr_cloud      = "10.8.0.0/14"
+  number_of_zones = 2
+  cidr_cloud_zones = { for zone in range(var.number_of_zones) : zone => {
     zone = "${var.region}-${zone + 1}" # us-south-1, us-south-2, ...
     cidr = cidrsubnet(local.cidr_cloud, 2, zone),
   } }
   # transit vpc cidr
-  cidr_transit_vpc = { for zone in range(var.zones_cloud) : zone => {
+  cidr_transit_vpc = { for zone in range(var.number_of_zones) : zone => {
     name      = "${var.prefix}-transit-${zone + 1}"
     zone      = "${var.region}-${zone + 1}"
     cidr      = cidrsubnet(local.cidr_cloud_zones[zone].cidr, 8, 0) # cidr for entire zone
@@ -27,7 +27,7 @@ locals {
   # spoke vpc 
   cidr_spoke_vpc = { for spoke in range(var.spokes) : spoke => {
     name = "${var.prefix}-spoke-${spoke}"
-    zones = { for zone in range(var.zones_cloud) : zone => {
+    zones = { for zone in range(var.number_of_zones) : zone => {
       name         = "${var.prefix}-spoke-${spoke}-${var.region}-${zone + 1}"
       zone         = "${var.region}-${zone + 1}"
       cidr         = cidrsubnet(local.cidr_cloud_zones[zone].cidr, 8, spoke + 1) # cidr for the spoke vpc

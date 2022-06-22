@@ -11,3 +11,4 @@ __pycache__
 .terraform*
 terraform.tfstate
 *.drawio.dtmp
+venv/

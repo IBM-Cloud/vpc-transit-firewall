@@ -74,7 +74,7 @@ transit_zones = {
     }
     "name" = "vpcfw-transit-1"
     "next_hop" = "10.8.0.198"
-    "subnet_available0_id" = "0717-0c87409e-a6b4-447d-93ed-acbff880ec9a"
+    "subnet_bastion_id" = "0717-0c87409e-a6b4-447d-93ed-acbff880ec9a"
     "vpc_id" = "r006-1aadb726-870e-4a8c-9cca-b30f7042ce58"
     "zone" = "us-south-1"
   }
@@ -175,7 +175,7 @@ listening on ens3, link-type EN10MB (Ethernet), capture size 262144 bytes
 ## Configuration
 There are a few terraform [variables](./variables.tf) that can be used to tune things up.  Here are a couple to look at:
 
-- firewall_replicas - default 1, if your firewall supports multiple instances then scaling them could hep with performance and availability.
+- number_of_firewalls_per_zone - default 1, if your firewall supports multiple instances then scaling them could hep with performance and availability.
 - firewall_lb - default true, if you only have a single firewall there is no reason to use a NLB, lets set this to false and try again:
 
 ```
@@ -198,7 +198,7 @@ transit_zones = {
     }
     "name" = "vpcfw-transit-1"
     "next_hop" = "10.8.0.196"
-    "subnet_available0_id" = "0717-0c87409e-a6b4-447d-93ed-acbff880ec9a"
+    "subnet_bastion_id" = "0717-0c87409e-a6b4-447d-93ed-acbff880ec9a"
     "vpc_id" = "r006-1aadb726-870e-4a8c-9cca-b30f7042ce58"
     "zone" = "us-south-1"
   }

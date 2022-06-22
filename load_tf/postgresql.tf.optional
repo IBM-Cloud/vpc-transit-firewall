@@ -33,7 +33,7 @@ resource "time_sleep" "wait_for_postgresql_initialization" {
 locals {
   transit_zone        = local.transit_zones[0]
   veg_vpc_id          = local.transit_zone.vpc_id
-  veg_subnet_id       = local.transit_zone.subnet_available0_id
+  veg_subnet_id       = local.transit_zone.subnet_bastion_id
   hostname_postgresql = ibm_database.postgresql.connectionstrings[0].hosts[0].hostname
   postgresql_port     = ibm_database.postgresql.connectionstrings[0].hosts[0].port
 }

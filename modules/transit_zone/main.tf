@@ -4,10 +4,10 @@
 locals {
   # the primary is always the next hop.  Ignore the secondary.
   next_hop        = var.firewall_lb ? ibm_is_lb.zone[0].private_ips[0] : ibm_is_instance.firewall[0].primary_network_interface[0].primary_ipv4_address
-  cidr_available0 = cidrsubnet(var.cidr, 2, 0)
-  cidr_available1 = cidrsubnet(var.cidr, 2, 1)
-  cidr_available2 = cidrsubnet(var.cidr, 2, 2)
-  cidr_firewall   = cidrsubnet(var.cidr, 2, 3)
+  cidr_firewall   = cidrsubnet(var.cidr, 2, 0)
+  cidr_bastion    = cidrsubnet(var.cidr, 2, 1)
+  cidr_available2 = cidrsubnet(var.cidr, 2, 2) # not used
+  cidr_available3 = cidrsubnet(var.cidr, 2, 3) # not used
 }
 
 # Prefix for the entire zone not just the VPC
@@ -24,21 +24,13 @@ resource "ibm_is_public_gateway" "zone" {
   zone = var.zone
 }
 
-resource "ibm_is_subnet" "zone" {
+resource "ibm_is_subnet" "firewall" {
   tags            = var.tags
-  name            = ibm_is_vpc_address_prefix.zone.name
+  name            = "${ibm_is_vpc_address_prefix.zone.name}-firewall"
   vpc             = var.vpc_id
   zone            = var.zone
   ipv4_cidr_block = local.cidr_firewall
   public_gateway  = ibm_is_public_gateway.zone.id
-}
-
-resource "ibm_is_subnet" "available0" {
-  tags            = var.tags
-  name            = "${ibm_is_vpc_address_prefix.zone.name}-0"
-  vpc             = var.vpc_id
-  zone            = var.zone
-  ipv4_cidr_block = local.cidr_available0
 }
 
 resource "ibm_is_security_group" "zone" {
@@ -60,7 +52,7 @@ resource "ibm_is_lb" "zone" {
   count      = var.firewall_lb ? 1 : 0
   route_mode = true
   name       = var.name
-  subnets    = [ibm_is_subnet.zone.id]
+  subnets    = [ibm_is_subnet.firewall.id]
   profile    = "network-fixed"
   type       = "private"
 }
@@ -99,17 +91,17 @@ resource "ibm_is_lb_pool_member" "zone" {
 
 # one fore each firewall replica
 resource "ibm_is_instance" "firewall" {
-  for_each       = { for key in range(var.firewall_replicas) : key => key }
+  for_each       = { for key in range(var.number_of_firewalls_per_zone) : key => key }
   tags           = var.tags
   resource_group = var.resource_group_id
   name           = "${var.name}-firewall-${each.value}"
   image          = var.image_id
   profile        = var.profile
   vpc            = var.vpc_id
-  zone           = ibm_is_subnet.zone.zone
+  zone           = ibm_is_subnet.firewall.zone
   keys           = var.keys
   primary_network_interface {
-    subnet            = ibm_is_subnet.zone.id
+    subnet            = ibm_is_subnet.firewall.id
     security_groups   = [ibm_is_security_group.zone.id]
     allow_ip_spoofing = true
   }
@@ -155,26 +147,29 @@ resource "ibm_is_floating_ip" "firewall" {
   target         = each.value.primary_network_interface[0].id
 }
 
-# bastion
-resource "ibm_is_instance" "bastion" {
-  tags           = var.tags
-  resource_group = var.resource_group_id
-  name           = "${var.name}-bastion"
-  image          = var.image_id
-  profile        = var.profile
-  vpc            = var.vpc_id
-  zone           = ibm_is_subnet.available0.zone
-  keys           = var.keys
-  primary_network_interface {
-    subnet          = ibm_is_subnet.available0.id
-    security_groups = [ibm_is_security_group.zone.id]
-  }
-  user_data = var.user_data
+# bastion ----------------------------------------
+resource "ibm_is_vpc_routing_table" "zone" {
+  vpc                           = var.vpc_id
+  name                          = var.name
+  route_transit_gateway_ingress = false
+  route_direct_link_ingress     = false
+  route_vpc_zone_ingress        = false
+}
+resource "ibm_is_vpc_routing_table_route" "zone" {
+  vpc           = var.vpc_id
+  routing_table = ibm_is_vpc_routing_table.zone.routing_table
+  zone          = var.zone
+  name          = var.name
+  destination   = var.cidr_zone # bastion to spoke access through firewall
+  action        = "deliver"
+  next_hop      = local.next_hop
 }
 
-resource "ibm_is_floating_ip" "bastion" {
-  tags           = var.tags
-  resource_group = var.resource_group_id
-  name           = ibm_is_instance.bastion.name
-  target         = ibm_is_instance.bastion.primary_network_interface[0].id
+resource "ibm_is_subnet" "bastion" {
+  tags            = var.tags
+  name            = "${ibm_is_vpc_address_prefix.zone.name}-bastion"
+  vpc             = var.vpc_id
+  zone            = var.zone
+  ipv4_cidr_block = local.cidr_bastion
+  routing_table   = var.use_routing ? ibm_is_vpc_routing_table.zone.routing_table : var.vpc_default_routing_table
 }

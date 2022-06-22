@@ -1,5 +1,5 @@
 variable "tg_gateway_id" {}
-variable "spoke_routing" {}
+variable "use_routing" {}
 variable "resource_group_id" {}
 variable "image_id" {}
 variable "profile" {}

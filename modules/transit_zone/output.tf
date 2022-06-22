@@ -19,16 +19,9 @@ output "firewalls" {
     primary_ipv4_address = instance.primary_network_interface[0].primary_ipv4_address
   } }
 }
-output "subnet_available0_id" {
-  value = ibm_is_subnet.available0.id
+output "subnet_bastion_id" {
+  value = ibm_is_subnet.bastion.id
 }
-output "bastion_primary_ipv4_address" {
-  value = ibm_is_instance.bastion.primary_network_interface[0].primary_ipv4_address
-}
-output "bastion_floating_ip_address" {
-  value = ibm_is_floating_ip.bastion.address
-}
-
 output "next_hop" {
   value = local.next_hop
 }

@@ -19,14 +19,13 @@ module "spoke_zones" {
   tags                      = var.tags
   vpc_id                    = ibm_is_vpc.spoke.id
   vpc_default_routing_table = ibm_is_vpc.spoke.default_routing_table
-  spoke_routing             = var.spoke_routing
+  use_routing               = var.use_routing
   resource_group_id         = var.resource_group_id
   image_id                  = var.image_id
   profile                   = var.profile
   keys                      = var.keys
   user_data                 = var.user_data
   next_hop                  = var.transit_zones[each.key].next_hop
-  bastion_cidr              = "${var.transit_zones[each.key].bastion_primary_ipv4_address}/32"
   name                      = each.value.name
   zone                      = each.value.zone
   cidr                      = each.value.cidr

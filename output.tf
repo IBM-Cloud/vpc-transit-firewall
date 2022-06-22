@@ -1,12 +1,10 @@
 output "transit_zones" {
   value = { for tz_key, tz in module.transit_zones : tz_key => {
-    vpc_id                       = tz.vpc_id
-    subnet_available0_id         = tz.subnet_available0_id
-    next_hop                     = tz.next_hop
-    zone                         = tz.zone
-    name                         = tz.name
-    bastion_primary_ipv4_address = tz.bastion_primary_ipv4_address
-    bastion_floating_ip_address  = tz.bastion_floating_ip_address
+    vpc_id            = tz.vpc_id
+    subnet_bastion_id = tz.subnet_bastion_id
+    next_hop          = tz.next_hop
+    zone              = tz.zone
+    name              = tz.name
     firewalls = { for fw_key, fw in tz.firewalls : fw_key => {
       floating_ip_address  = fw.floating_ip_address
       primary_ipv4_address = fw.primary_ipv4_address
