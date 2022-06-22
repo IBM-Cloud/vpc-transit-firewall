@@ -118,6 +118,8 @@ resource "ibm_is_instance" "firewall" {
     :FORWARD DROP
     -A FORWARD -s ${var.cidr_zone} -d ${var.cidr_zone} -p tcp -j ACCEPT
     COMMIT
+    *nat
+    COMMIT
     EOF
     #
     sed -e "s/HOSTNAMEI/$(hostname -I)/" > /etc/iptables.public << 'EOF'
