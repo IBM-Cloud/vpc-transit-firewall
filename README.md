@@ -31,7 +31,7 @@ ibmcloud iam user-policy-create YOUR_USER_EMAIL_ADDRESS --roles "IP Spoofing Ope
 
 ## TLDR;
 
-Create the vpcs, firewall, routes and transit bastion:
+Create the vpcs, firewall and vpc routes:
 ```
 cp template.local.env local.env
 # make any adjustments
@@ -41,12 +41,18 @@ terraform init
 terraform apply
 ```
 
-Create the spoke instances to generate load:
+Create the spoke instances to generate load and the transit bastion to access the spoke instances:
 ```
 cd load_tf
 terraform init
 terraform apply
 ```
+
+Your architecture now looks like this:
+
+![intro](./images/firewall-intro-bastion.svg)
+
+
 
 By default one availability zone with one firewall is created which makes it easier to explore and test.
 
