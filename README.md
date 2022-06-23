@@ -53,8 +53,12 @@ Your architecture now looks like this:
 ![intro](./images/firewall-intro-bastion.svg)
 
 
+And contains only one zone and firewall:
 
-By default one availability zone with one firewall is created which makes it easier to explore and test.
+![zonal](./images/firewall-onezone.svg)
+
+
+To change the number of firewalls, zones, spokes, ... see the [Configuration]() section below.
 
 NOTE: The output generated in my example are shown below.  Your IP values will be different, adjust the steps accordingly.
 
