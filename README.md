@@ -1,5 +1,6 @@
 # Firewall appliances in a transit VPC
-This is the companion repository for the blog post [VPC Transit Firewall](todo).  Terraform is used in this repository to deploy the following architecture:
+This is the companion repository for the blog post: [How to Use a Transit VPC with Firewall/Routers to Control Traffic in a Collection of Spoke VPCs
+](https://www.ibm.com/cloud/blog/how-to-use-a-transit-vpc-with-firewall/routers-to-control-traffic-in-a-collection-of-spoke-vpcs).  Terraform is used in this repository to deploy the following architecture:
 
 ## Diagram showing flows:
 
